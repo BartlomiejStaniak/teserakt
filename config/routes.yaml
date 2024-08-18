@@ -1,0 +1,13 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+
+maps:
+    path: /maps
+    controller: App\Controller\MapsController::index
+#send:
+#    path: /send-mail
+#    controller: App\Controller\MailController::send

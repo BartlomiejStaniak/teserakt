@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Montserrat:400,700");
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background-color: #131217;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            display: grid;
+            place-content: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 8rem;
+            font-weight: 700;
+            color: white;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        #pattern {
+            position: absolute;
+            top: -44px;
+            left: -50px;
+            right: 0;
+            bottom: 0;
+        }
+
+        #gradient {
+            background: radial-gradient(#002aff, transparent 50%);
+            width: 400px;
+            height: 400px;
+            position: absolute;
+            top: -200px;
+            left: -200px;
+            transform: translate(200px, 200px);
+        }
+
+        .links {
+            border-top: 1px solid #ffffff50;
+            border-right: 1px solid #ffffff50;
+            border-top-right-radius: 0.5rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 400;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .links > a {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0.5;
+        }
+
+        .links > a:hover {
+            opacity: 1;
+        }
+
+        .links > a > svg {
+            margin-left: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .links > a:nth-child(1) > svg {
+            stroke: #dd2d4a;
+        }
+
+        .links > a:nth-child(2) > svg {
+            stroke: #2b59c3;
+        }
+
+        .container {
+            position: relative;
+            width: 400px;
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            background: #333;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 1px solid #111;
+            gap: 10px;
+            padding-bottom: 70px;
+            z-index: 2;
+            -webkit-box-reflect: below 1px linear-gradient(transparent, transparent, #0005);
+        }
+
+        .container h2 {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .inputArea {
+            position: relative;
+            width: 100%;
+        }
+
+        .inputArea input {
+            position: relative;
+            width: 100%;
+            background: #222;
+            border: none;
+            outline: none;
+            padding: 10px;
+            color: aliceblue;
+            font-size: 1.1em;
+        }
+
+        .strengthMeter {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background: #222;
+        }
+
+        .strengthMeter::before {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 100%;
+            transition: 0.5s;
+            background: #f00;
+        }
+
+        .weak .strengthMeter::before {
+            width: 10%;
+            background: #f00;
+            filter: drop-shadow(0 0 5px #f00) drop-shadow(0 0 10px #f00) drop-shadow(0 0 20px #f00);
+        }
+
+        .moderate .strengthMeter::before {
+            width: 70%;
+            background: #eedc3d;
+            filter: drop-shadow(0 0 5px #eedc3d) drop-shadow(0 0 10px #eedc3d) drop-shadow(0 0 20px #eedc3d);
+        }
+
+        .strong .strengthMeter::before {
+            width: 100%;
+            background: #18e605;
+            filter: drop-shadow(0 0 5px #18e605) drop-shadow(0 0 10px #18e605) drop-shadow(0 0 20px #18e605);
+        }
+
+        .strengthMeter::after {
+            position: absolute;
+            top: -45px;
+            left: 30px;
+            transition: 0.5s;
+            color: aliceblue;
+        }
+
+        .weak .strengthMeter::after {
+            content: "Weak Password";
+            color: #f00;
+            filter: drop-shadow(0 0 5px #f00);
+        }
+
+        .moderate .strengthMeter::after {
+            content: "Moderate Password";
+            color: #eedc3d;
+            filter: drop-shadow(0 0 5px #eedc3d);
+        }
+
+        .strong .strengthMeter::after {
+            content: "Strong Password";
+            color: #18e605;
+            filter: drop-shadow(0 0 5px #18e605);
+        }
+
+        .show {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 100%;
+            background: #333;
+            border: 6px solid #222;
+            cursor: pointer;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+
+        .show::before {
+            content: "Show";
+            font-size: 0.6em;
+            color: aliceblue;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .show.hide::before {
+            content: "Hide";
+        }
+
+        .registration-form {
+            color: white;
+        }
+
+        .registration-form h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            background-color: #ff1e00;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff1e00;
+        }
+    </style>
+</head>
+<body>
+<h1>Teserekat</h1>
+<div id="gradient"></div>
+<div id="pattern"></div>
+
+<div class="container">
+    <div class="registration-form">
+        <h2>Register</h2>
+        <form action="#">
+            <div class="form-group inputArea">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group inputArea">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password">
+                <div class="show"></div>
+                <div class="strengthMeter"></div>
+            </div>
+            <div class="form-group inputArea">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password">
+                <div class="show"></div>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</div>
+
+<div class="links">
+    <a href="https://youtu.be/4cI3NSPHRoY" target="_blank" class="youtube">
+        Watch on YouTube
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-youtube">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" />
+            <path d="M10 9l5 3l-5 3z" />
+        </svg>
+    </a>
+</div>
+
+<script>
+    const patternElement = document.getElementById("pattern");
+
+    const countY = Math.ceil(patternElement.clientHeight / 40) + 1;
+    const countX = Math.ceil(patternElement.clientWidth / 48) + 1;
+    const gap = 2;
+
+    for (let i = 0; i < countY; i++) {
+        for (let j = 0; j < countX; j++) {
+            const hexagon = document.createElement("div");
+            hexagon.style = `
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODciIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgODcgMTAwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMi4xOTg3MyAyNi4xNTQ3TDQzLjUgMi4zMDk0TDg0LjgwMTMgMjYuMTU0N1Y3My44NDUzTDQzLjUgOTcuNjkwNkwyLjE5ODczIDczLjg0NTNWMjYuMTU0N1oiIGZpbGw9IiMxMzEyMTciIHN0cm9rZT0iIzEzMTIxNyIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cjwvc3ZnPgo=') no-repeat;
+      width: 44px;
+      height: 50px;
+      background-size: contain;
+      position: absolute;
+      top: ${i * 40}px;
+      left: ${j * 48 + ((i * 24) % 48)}px;
+    `;
+
+            patternElement.appendChild(hexagon);
+        }
+    }
+
+    let mousePosition = {
+        x: 0,
+        y: 0
+    };
+
+    document.addEventListener("mousemove", (mouse) => {
+        mousePosition = {
+            x: mouse.clientX,
+            y: mouse.clientY
+        };
+    });
+
+    const loop = () => {
+        const gradientElement = document.getElementById("gradient");
+
+        gradientElement.style.transform = `translate(${mousePosition.x}px, ${mousePosition.y}px)`;
+
+        window.requestAnimationFrame(loop);
+    };
+
+    window.requestAnimationFrame(loop);
+
+    function Strength(password) {
+        let i = 0;
+        if (password.length > 6) {
+            i++;
+        }
+        if (password.length >= 10) {
+            i++;
+        }
+
+        if (/[A-Z]/.test(password)) {
+            i++;
+        }
+
+        if (/[0-9]/.test(password)) {
+            i++;
+        }
+
+        if (/[A-Za-z0-8]/.test(password)) {
+            i++;
+        }
+
+        return i;
+    }
+
+    let container = document.querySelector(".container");
+    document.addEventListener("keyup", function (e) {
+        let password = document.querySelector("#password").value;
+
+        let strength = Strength(password);
+        if (strength <= 2) {
+            container.classList.add("weak");
+            container.classList.remove("moderate");
+            container.classList.remove("strong");
+        } else if (strength >= 2 && strength <= 4) {
+            container.classList.remove("weak");
+            container.classList.add("moderate");
+            container.classList.remove("strong");
+        } else {
+            container.classList.remove("weak");
+            container.classList.remove("moderate");
+            container.classList.add("strong");
+        }
+    });
+
+    document.querySelectorAll(".show").forEach(function (show) {
+        show.addEventListener("click", function () {
+            const passwordField = show.previousElementSibling;
+            if (passwordField.type === "password") {
+                passwordField.setAttribute("type", "text");
+                show.classList.add("hide");
+            } else {
+                passwordField.setAttribute("type", "password");
+                show.classList.remove("hide");
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

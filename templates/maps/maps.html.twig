@@ -1,0 +1,74 @@
+{# templates/hex_grid/index.html.twig #}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Siatka Heksagonalna</title>
+	<style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 20px auto;
+        }
+	</style>
+</head>
+<body>
+<h1>Siatka Heksagonalna</h1>
+{#<form method="get" action="{{ path('/maps') }}">#}
+	<label for="radius">Promień heksów:</label>
+	<input type="number" id="radius" name="radius" value="{{ radius }}" min="5" max="100">
+	<button type="submit">Rysuj siatkę</button>
+</form>
+<canvas id="hexCanvas"></canvas>
+
+<script>
+    const radius = {{ radius }};
+    const canvas = document.getElementById('hexCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const hexHeight = Math.sqrt(3) * radius;
+    const hexWidth = 2 * radius;
+    const vertDist = hexHeight;
+    const horizDist = 3/2 * radius;
+
+    const cols = Math.floor(window.innerWidth / horizDist);
+    const rows = Math.floor(window.innerHeight / vertDist) + 1;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function drawHex(x, y) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            ctx.lineTo(x + radius * Math.cos(i * Math.PI / 3), y + radius * Math.sin(i * Math.PI / 3));
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = 'lightgrey';
+        ctx.fill();
+
+        // Dodaj przycisk (heksagon jako przycisk)
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Click", x, y);
+    }
+
+    // Rysowanie siatki
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const x = col * horizDist;
+            const y = row * vertDist + (col % 2) * (vertDist / 2);
+            drawHex(x, y);
+        }
+    }
+</script>
+</body>
+</html>
