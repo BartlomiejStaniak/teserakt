@@ -10,6 +10,8 @@
 ###< symfony/framework-bundle ###
 
 ###> symfony/webpack-encore-bundle ###
+41
+41.pub
 /node_modules/
 /public/build/
 npm-debug.log

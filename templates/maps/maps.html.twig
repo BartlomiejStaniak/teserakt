@@ -1,4 +1,3 @@
-{# templates/hex_grid/index.html.twig #}
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -20,7 +19,7 @@
 </head>
 <body>
 <h1>Siatka Heksagonalna</h1>
-{#<form method="get" action="{{ path('/maps') }}">#}
+<form method="get" action="{{ path('maps') }}">
 	<label for="radius">Promień heksów:</label>
 	<input type="number" id="radius" name="radius" value="{{ radius }}" min="5" max="100">
 	<button type="submit">Rysuj siatkę</button>
@@ -37,38 +36,80 @@
     const vertDist = hexHeight;
     const horizDist = 3/2 * radius;
 
-    const cols = Math.floor(window.innerWidth / horizDist);
-    const rows = Math.floor(window.innerHeight / vertDist) + 1;
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    function drawHex(x, y) {
+    // Załaduj współrzędne z danych
+    const coordinates = {{ coordinates|json_encode|raw }};
+
+    function drawHex(x, y, color) {
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
             ctx.lineTo(x + radius * Math.cos(i * Math.PI / 3), y + radius * Math.sin(i * Math.PI / 3));
         }
         ctx.closePath();
-        ctx.stroke();
-        ctx.fillStyle = 'lightgrey';
+
+        // Wypełnij heksagon kolorem
+        ctx.fillStyle = color;
         ctx.fill();
 
-        // Dodaj przycisk (heksagon jako przycisk)
+        // Rysowanie konturu heksagonu
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+
+        // Dodaj status z danych (jeśli dostępne)
         ctx.font = "16px Arial";
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("Click", x, y);
+        ctx.fillText(color, x, y);  // Wyświetl kolor w heksagonie
     }
 
-    // Rysowanie siatki
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            const x = col * horizDist;
-            const y = row * vertDist + (col % 2) * (vertDist / 2);
-            drawHex(x, y);
+    // Rysowanie siatki tylko na podstawie danych z bazy
+    coordinates.forEach(coord => {
+        const x = coord.point_x * horizDist;
+        const y = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
+        const color = getColorFromStatus(coord.status);
+        drawHex(x, y, color);
+    });
+
+    function isPointInHex(px, py, hx, hy) {
+        // Sprawdzanie, czy punkt (px, py) jest wewnątrz heksagonu z centrum (hx, hy)
+        const dx = px - hx;
+        const dy = py - hy;
+        return (dx * dx + dy * dy) <= (radius * radius);
+    }
+
+    function handleClick(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        for (const coord of coordinates) {
+            const hexX = coord.point_x * horizDist;
+            const hexY = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
+            if (isPointInHex(x, y, hexX, hexY)) {
+                alert(`Status w heksagonie ${coord.point_x}, ${coord.point_y}: ${coord.status || "Brak danych"}`);
+                return;
+            }
         }
     }
+
+    function getColorFromStatus(status) {
+        const colorMap = {
+            'Biały': '#FFFFFF',
+            'Czarny': '#000000',
+            'Czerwony': '#FF0000',
+            'Zielony': '#00FF00',
+            'Niebieski': '#0000FF',
+            'Żółty': '#FFFF00',
+            'Szary': '#808080'
+        };
+        return colorMap[status] || '#FFFFFF';  // Domyślny kolor biały, jeśli status nie jest rozpoznany
+    }
+
+    canvas.addEventListener('click', handleClick);
+
 </script>
 </body>
 </html>
