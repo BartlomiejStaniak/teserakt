@@ -10,6 +10,20 @@
             text-align: center;
             margin: 20px;
         }
+        #map-container {
+            width: 800px;
+            height: 800px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid black;
+            margin: 20px auto;
+        }
+        #map {
+            position: absolute;
+            width: 10000px;
+            height: 10000px;
+            background-color: #ccc;
+        }
         canvas {
             border: 1px solid black;
             display: block;
@@ -19,97 +33,106 @@
 </head>
 <body>
 <h1>Siatka Heksagonalna</h1>
-<form method="get" action="{{ path('maps') }}">
-	<label for="radius">Promień heksów:</label>
-	<input type="number" id="radius" name="radius" value="{{ radius }}" min="5" max="100">
-	<button type="submit">Rysuj siatkę</button>
-</form>
-<canvas id="hexCanvas"></canvas>
 
+<div id="map-container">
+	<div id="map" data="{{ coordinates | raw }}">
+		<canvas id="hexCanvas"></canvas>
+	</div>
+</div>
+
+<input type="range" id="xRange" min="0" max="9800" value="0">
+<input type="range" id="yRange" min="0" max="9800" value="0">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const radius = {{ radius }};
-    const canvas = document.getElementById('hexCanvas');
-    const ctx = canvas.getContext('2d');
+    // Funkcja do aktualizacji mapy
+    function updateMap() {
+        const x = $('#xRange').val();
+        const y = $('#yRange').val();
 
-    const hexHeight = Math.sqrt(3) * radius;
-    const hexWidth = 2 * radius;
-    const vertDist = hexHeight;
-    const horizDist = 3/2 * radius;
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Załaduj współrzędne z danych
-    const coordinates = {{ coordinates|json_encode|raw }};
-
-    function drawHex(x, y, color) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            ctx.lineTo(x + radius * Math.cos(i * Math.PI / 3), y + radius * Math.sin(i * Math.PI / 3));
-        }
-        ctx.closePath();
-
-        // Wypełnij heksagon kolorem
-        ctx.fillStyle = color;
-        ctx.fill();
-
-        // Rysowanie konturu heksagonu
-        ctx.strokeStyle = 'black';
-        ctx.stroke();
-
-        // Dodaj status z danych (jeśli dostępne)
-        ctx.font = "16px Arial";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(color, x, y);  // Wyświetl kolor w heksagonie
-    }
-
-    // Rysowanie siatki tylko na podstawie danych z bazy
-    coordinates.forEach(coord => {
-        const x = coord.point_x * horizDist;
-        const y = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
-        const color = getColorFromStatus(coord.status);
-        drawHex(x, y, color);
-    });
-
-    function isPointInHex(px, py, hx, hy) {
-        // Sprawdzanie, czy punkt (px, py) jest wewnątrz heksagonu z centrum (hx, hy)
-        const dx = px - hx;
-        const dy = py - hy;
-        return (dx * dx + dy * dy) <= (radius * radius);
-    }
-
-    function handleClick(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        for (const coord of coordinates) {
-            const hexX = coord.point_x * horizDist;
-            const hexY = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
-            if (isPointInHex(x, y, hexX, hexY)) {
-                alert(`Status w heksagonie ${coord.point_x}, ${coord.point_y}: ${coord.status || "Brak danych"}`);
-                return;
+        $.ajax({
+            url: "{{ path('update_map') }}",
+            method: "GET",
+            data: { x, y },
+            success: function(data) {
+                $('#map').html(data);
+                // Po załadowaniu danych rysujemy heksagony
+                drawHexagons();
             }
+        });
+    }
+
+    // Funkcja do rysowania heksagonów
+    function drawHexagons() {
+        const canvas = document.getElementById('hexCanvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Kontekst 2D nie został poprawnie załadowany');
+            return;
+        }
+
+        // Ustawienia canvas
+        canvas.width = $('#map').width();
+        canvas.height = $('#map').height();
+
+        // Wczytanie danych z atrybutu danych mapy
+		const data ='coordinates'
+        const dataCoordinates = document.getElementById('map').getAttribute('data');
+		// console.log(dataCoordinates)
+        // const coordinates = JSON.parse('data');
+        let coordinates = [];
+        try {
+            coordinates = JSON.parse(dataCoordinates);
+        } catch (e) {
+            console.error('Błąd parsowania JSON:', e);
+            return;
+        }
+        console.log(coordinates)
+
+        const radius = 30; // Stały promień dla rysowania heksagonów
+        const hexHeight = Math.sqrt(3) * radius;
+        const hexWidth = 2 * radius;
+        const vertDist = hexHeight;
+        const horizDist = 3/2 * radius;
+
+        function drawHex(x, y, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                ctx.lineTo(x + radius * Math.cos(i * Math.PI / 3), y + radius * Math.sin(i * Math.PI / 3));
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+        }
+
+        coordinates.forEach(coord => {
+            const x = coord.point_x * horizDist;
+            const y = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
+            const color = getColorFromStatus(coord.status);
+            drawHex(x, y, color);
+        });
+
+        function getColorFromStatus(status) {
+            const colorMap = {
+                'Biały': '#FFFFFF',
+                'Czarny': '#000000',
+                'Czerwony': '#FF0000',
+                'Zielony': '#00FF00',
+                'Niebieski': '#0000FF',
+                'Żółty': '#FFFF00',
+                'Szary': '#808080'
+            };
+            return colorMap[status] || '#FFFFFF';
         }
     }
 
-    function getColorFromStatus(status) {
-        const colorMap = {
-            'Biały': '#FFFFFF',
-            'Czarny': '#000000',
-            'Czerwony': '#FF0000',
-            'Zielony': '#00FF00',
-            'Niebieski': '#0000FF',
-            'Żółty': '#FFFF00',
-            'Szary': '#808080'
-        };
-        return colorMap[status] || '#FFFFFF';  // Domyślny kolor biały, jeśli status nie jest rozpoznany
-    }
+    // Dodanie nasłuchiwaczy na suwaki
+    $('#xRange, #yRange').on('input', updateMap);
 
-    canvas.addEventListener('click', handleClick);
-
+    // Inicjalne załadowanie mapy
+    updateMap();
 </script>
 </body>
 </html>

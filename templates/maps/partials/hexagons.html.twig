@@ -1,0 +1,61 @@
+{% extends 'maps/maps.html.twig' %}
+
+{% block body %}
+<script>
+    function drawHexagons(coordinates) {
+        const canva = document.getElementById('hexCanvas');
+        // const canva = 20;
+        console.log(canva, 'why')
+        const ctx = canva.getContext('2d');
+        if (!ctx) {
+            console.error('Kontekst 2D nie został poprawnie załadowany');
+            return;
+        }
+
+        // Ustawienia canvas
+        canva.width = $('#map').width();
+        canva.height = $('#map').height();
+
+        const radius = 30; // Stały promień dla rysowania heksagonów
+        const hexHeight = Math.sqrt(3) * radius;
+        const hexWidth = 2 * radius;
+        const vertDist = hexHeight;
+        const horizDist = 3/2 * radius;
+
+        function drawHex(x, y, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                ctx.lineTo(x + radius * Math.cos(i * Math.PI / 3), y + radius * Math.sin(i * Math.PI / 3));
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+        }
+
+        coordinates.forEach(coord => {
+            const x = coord.point_x * horizDist;
+            const y = coord.point_y * vertDist + (coord.point_x % 2) * (vertDist / 2);
+            const color = getColorFromStatus(coord.status);
+            drawHex(x, y, color);
+        });
+
+        function getColorFromStatus(status) {
+            const colorMap = {
+                'Biały': '#FFFFFF',
+                'Czarny': '#000000',
+                'Czerwony': '#FF0000',
+                'Zielony': '#00FF00',
+                'Niebieski': '#0000FF',
+                'Żółty': '#FFFF00',
+                'Szary': '#808080'
+            };
+            return colorMap[status] || '#FFFFFF';
+        }
+    }
+
+    // Wywołanie funkcji, gdy dane są już dostępne
+    drawHexagons({{ coordinates|json_encode|raw }});
+</script>
+{% endblock %}

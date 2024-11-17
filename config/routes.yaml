@@ -8,6 +8,11 @@ controllers:
 maps:
     path: /maps
     controller: App\Controller\MapsController::index
+
+
+update_maps:
+    path: /update_maps
+    controller: App\Controller\MapsController::updateMap
 #send:
 #    path: /send-mail
 #    controller: App\Controller\MailController::send
